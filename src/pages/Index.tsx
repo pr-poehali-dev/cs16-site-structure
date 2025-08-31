@@ -16,6 +16,10 @@ const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 2000]);
+  const [sortBy, setSortBy] = useState('popular');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,7 +37,12 @@ const Index = () => {
       category: "plugins",
       type: "Jail",
       description: "Полнофункциональный плагин для Jail серверов с расширенными возможностями",
-      image: "🔒"
+      image: "🔒",
+      rating: 4.9,
+      reviews: 127,
+      downloads: 456,
+      isHit: true,
+      isNew: false
     },
     {
       id: 2,
@@ -42,7 +51,12 @@ const Index = () => {
       category: "plugins", 
       type: "ZM",
       description: "Продвинутый зомби мод с уникальными возможностями и режимами игры",
-      image: "🧟"
+      image: "🧟",
+      rating: 4.7,
+      reviews: 89,
+      downloads: 312,
+      isHit: false,
+      isNew: true
     },
     {
       id: 3,
@@ -51,7 +65,12 @@ const Index = () => {
       category: "models",
       type: "Players",
       description: "Набор высококачественных моделей игроков для CT и T команд",
-      image: "🎭"
+      image: "🎭",
+      rating: 4.6,
+      reviews: 67,
+      downloads: 189,
+      isHit: false,
+      isNew: false
     },
     {
       id: 4,
@@ -60,7 +79,12 @@ const Index = () => {
       category: "models",
       type: "Weapons", 
       description: "Стильная модель AK-47 в стиле Redline с анимацией",
-      image: "🔫"
+      image: "🔫",
+      rating: 4.5,
+      reviews: 34,
+      downloads: 156,
+      isHit: false,
+      isNew: true
     },
     {
       id: 5,
@@ -69,7 +93,12 @@ const Index = () => {
       category: "builds",
       type: "Full",
       description: "Полная сборка сервера со всеми необходимыми плагинами",
-      image: "🖥️"
+      image: "🖥️",
+      rating: 4.9,
+      reviews: 23,
+      downloads: 78,
+      isHit: true,
+      isNew: false
     },
     {
       id: 6,
@@ -78,7 +107,12 @@ const Index = () => {
       category: "plugins",
       type: "Performance",
       description: "Пакет плагинов для оптимизации производительности сервера",
-      image: "⚡"
+      image: "⚡",
+      rating: 4.8,
+      reviews: 45,
+      downloads: 234,
+      isHit: true,
+      isNew: false
     }
   ];
 
@@ -93,6 +127,26 @@ const Index = () => {
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price, 0);
   };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+    return matchesSearch && matchesPrice;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low': return a.price - b.price;
+      case 'price-high': return b.price - a.price;
+      case 'rating': return b.rating - a.rating;
+      case 'downloads': return b.downloads - a.downloads;
+      default: return b.isHit ? 1 : -1;
+    }
+  });
+
+  const hitProducts = products.filter(p => p.isHit);
+  const newProducts = products.filter(p => p.isNew);
 
   const handleAuth = () => {
     setShowAuthModal(false);
@@ -247,12 +301,228 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Hit Products Section */}
+      <section className="py-16 px-4 bg-cs-navy/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              🔥 Хиты продаж
+            </h2>
+            <p className="text-cs-gray">Самые популярные товары среди игроков</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {hitProducts.slice(0, 3).map((product) => (
+              <Card key={product.id} className="bg-gradient-to-br from-cs-orange/20 to-cs-blue/20 backdrop-blur-sm border-cs-orange/50 hover:border-cs-orange transition-colors relative overflow-hidden">
+                <div className="absolute top-2 right-2">
+                  <Badge className="bg-cs-orange text-white">ХИТ</Badge>
+                </div>
+                <CardHeader>
+                  <div className="text-4xl mb-2">{product.image}</div>
+                  <CardTitle className="text-white">{product.name}</CardTitle>
+                  <CardDescription className="text-cs-gray">
+                    {product.description}
+                  </CardDescription>
+                  <div className="flex items-center space-x-2 text-sm text-cs-gray">
+                    <Icon name="Star" size={16} className="text-yellow-400 fill-yellow-400" />
+                    <span>{product.rating}</span>
+                    <span>•</span>
+                    <Icon name="Download" size={16} />
+                    <span>{product.downloads}</span>
+                    <span>•</span>
+                    <Icon name="MessageSquare" size={16} />
+                    <span>{product.reviews}</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between mb-4">
+                    <Badge variant="secondary" className="bg-cs-orange/20 text-cs-orange">
+                      {product.type}
+                    </Badge>
+                    <span className="text-2xl font-bold text-cs-orange">{product.price}₽</span>
+                  </div>
+                  <Button 
+                    className="w-full bg-cs-orange hover:bg-cs-orange/90"
+                    onClick={() => addToCart(product)}
+                  >
+                    <Icon name="ShoppingCart" className="mr-2" size={16} />
+                    Добавить в корзину
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* New Products */}
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              ✨ Новинки
+            </h3>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {newProducts.slice(0, 2).map((product) => (
+              <Card key={product.id} className="bg-gradient-to-r from-cs-blue/20 to-cs-navy/20 backdrop-blur-sm border-cs-blue/50 hover:border-cs-orange/50 transition-colors relative">
+                <div className="absolute top-2 right-2">
+                  <Badge className="bg-green-500 text-white">NEW</Badge>
+                </div>
+                <CardHeader>
+                  <div className="flex items-start space-x-4">
+                    <div className="text-3xl">{product.image}</div>
+                    <div className="flex-1">
+                      <CardTitle className="text-white mb-2">{product.name}</CardTitle>
+                      <CardDescription className="text-cs-gray mb-3">
+                        {product.description}
+                      </CardDescription>
+                      <div className="flex items-center space-x-4 text-sm text-cs-gray">
+                        <div className="flex items-center space-x-1">
+                          <Icon name="Star" size={14} className="text-yellow-400 fill-yellow-400" />
+                          <span>{product.rating}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Icon name="Download" size={14} />
+                          <span>{product.downloads}</span>
+                        </div>
+                        <Badge variant="secondary" className="bg-cs-orange/20 text-cs-orange">
+                          {product.type}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-cs-orange">{product.price}₽</span>
+                      <Button 
+                        className="w-full mt-2 bg-cs-orange hover:bg-cs-orange/90"
+                        onClick={() => addToCart(product)}
+                        size="sm"
+                      >
+                        <Icon name="Plus" className="mr-1" size={14} />
+                        В корзину
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Products Catalog */}
       <section id="shop" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-white mb-4">Каталог товаров</h2>
             <p className="text-cs-gray">Профессиональные решения для вашего сервера</p>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="mb-8">
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <div className="relative">
+                  <Icon name="Search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cs-gray" size={20} />
+                  <Input
+                    placeholder="Поиск плагинов, моделей, сборок..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-cs-blue/20 border-cs-gray/30 text-white placeholder:text-cs-gray"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48 bg-cs-blue/20 border-cs-gray/30 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popular">По популярности</SelectItem>
+                    <SelectItem value="price-low">Цена: по возрастанию</SelectItem>
+                    <SelectItem value="price-high">Цена: по убыванию</SelectItem>
+                    <SelectItem value="rating">По рейтингу</SelectItem>
+                    <SelectItem value="downloads">По скачиваниям</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="border-cs-gray/30 text-cs-orange hover:bg-cs-orange/10"
+                >
+                  <Icon name="Filter" className="mr-2" size={16} />
+                  Фильтры
+                </Button>
+              </div>
+            </div>
+
+            {/* Advanced Filters */}
+            {showFilters && (
+              <Card className="bg-cs-navy/50 border-cs-gray/20 p-4 mb-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div>
+                    <Label className="text-white mb-2 block">Ценовой диапазон</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        placeholder="От"
+                        value={priceRange[0]}
+                        onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                        className="bg-cs-blue/20 border-cs-gray/30 text-white"
+                      />
+                      <span className="text-cs-gray">-</span>
+                      <Input
+                        type="number"
+                        placeholder="До"
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 2000])}
+                        className="bg-cs-blue/20 border-cs-gray/30 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white mb-2 block">Рейтинг от</Label>
+                    <div className="flex items-center space-x-1">
+                      {[4.0, 4.5, 4.8].map((rating) => (
+                        <Button
+                          key={rating}
+                          variant="outline"
+                          size="sm"
+                          className="border-cs-gray/30 text-cs-gray hover:text-cs-orange hover:border-cs-orange/50"
+                        >
+                          <Icon name="Star" className="mr-1" size={12} />
+                          {rating}+
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white mb-2 block">Статус</Label>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="bg-cs-orange/20 text-cs-orange cursor-pointer hover:bg-cs-orange/30">
+                        Хиты
+                      </Badge>
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-400 cursor-pointer hover:bg-green-500/30">
+                        Новинки
+                      </Badge>
+                      <Badge variant="secondary" className="bg-blue-500/20 text-blue-400 cursor-pointer hover:bg-blue-500/30">
+                        Скидки
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            <div className="flex items-center justify-between text-cs-gray">
+              <p>Найдено товаров: <span className="text-white font-semibold">{sortedProducts.length}</span></p>
+              <div className="flex items-center space-x-2">
+                <span>Показать:</span>
+                <Button variant="ghost" size="sm" className="text-cs-orange hover:bg-cs-orange/10">
+                  <Icon name="Grid3X3" size={16} />
+                </Button>
+                <Button variant="ghost" size="sm" className="text-cs-gray hover:text-cs-orange hover:bg-cs-orange/10">
+                  <Icon name="List" size={16} />
+                </Button>
+              </div>
+            </div>
           </div>
           
           <Tabs defaultValue="all" className="w-full">
@@ -265,14 +535,31 @@ const Index = () => {
             
             <TabsContent value="all">
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <Card key={product.id} className="bg-white/10 backdrop-blur-sm border-cs-gray/20 hover:border-cs-orange/50 transition-colors">
+                {sortedProducts.map((product) => (
+                  <Card key={product.id} className="bg-white/10 backdrop-blur-sm border-cs-gray/20 hover:border-cs-orange/50 transition-colors relative">
+                    {(product.isHit || product.isNew) && (
+                      <div className="absolute top-2 right-2 z-10">
+                        {product.isHit && <Badge className="bg-cs-orange text-white mr-1">ХИТ</Badge>}
+                        {product.isNew && <Badge className="bg-green-500 text-white">NEW</Badge>}
+                      </div>
+                    )}
                     <CardHeader>
                       <div className="text-4xl mb-2">{product.image}</div>
                       <CardTitle className="text-white">{product.name}</CardTitle>
-                      <CardDescription className="text-cs-gray">
+                      <CardDescription className="text-cs-gray mb-3">
                         {product.description}
                       </CardDescription>
+                      <div className="flex items-center space-x-4 text-sm text-cs-gray">
+                        <div className="flex items-center space-x-1">
+                          <Icon name="Star" size={14} className="text-yellow-400 fill-yellow-400" />
+                          <span className="text-white">{product.rating}</span>
+                          <span>({product.reviews})</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Icon name="Download" size={14} />
+                          <span>{product.downloads}</span>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between mb-4">
@@ -281,13 +568,22 @@ const Index = () => {
                         </Badge>
                         <span className="text-2xl font-bold text-cs-orange">{product.price}₽</span>
                       </div>
-                      <Button 
-                        className="w-full bg-cs-orange hover:bg-cs-orange/90"
-                        onClick={() => addToCart(product)}
-                      >
-                        <Icon name="ShoppingCart" className="mr-2" size={16} />
-                        Добавить в корзину
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1 bg-cs-orange hover:bg-cs-orange/90"
+                          onClick={() => addToCart(product)}
+                        >
+                          <Icon name="ShoppingCart" className="mr-2" size={16} />
+                          В корзину
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          className="border-cs-gray/30 text-cs-gray hover:text-cs-orange hover:border-cs-orange/50"
+                        >
+                          <Icon name="Eye" size={16} />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
