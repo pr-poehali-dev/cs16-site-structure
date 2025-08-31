@@ -10,9 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 
-const Index = () => {
+interface IndexProps {
+  addToCart: (product: any) => void;
+}
+
+const Index = ({ addToCart }: IndexProps) => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [cartItems, setCartItems] = useState<any[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -116,17 +119,7 @@ const Index = () => {
     }
   ];
 
-  const addToCart = (product: any) => {
-    setCartItems([...cartItems, product]);
-  };
 
-  const removeFromCart = (productId: number) => {
-    setCartItems(cartItems.filter(item => item.id !== productId));
-  };
-
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + item.price, 0);
-  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
