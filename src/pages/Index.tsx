@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,17 @@ import Icon from '@/components/ui/icon';
 const Index = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [cartItems, setCartItems] = useState<any[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAuthModal(true);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const products = [
     {
@@ -83,8 +94,69 @@ const Index = () => {
     return cartItems.reduce((total, item) => total + item.price, 0);
   };
 
+  const handleAuth = () => {
+    setShowAuthModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cs-navy via-cs-blue to-cs-navy">
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md bg-cs-navy border-cs-orange/50">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-cs-orange text-center">
+              🎮 Добро пожаловать в CS 1.6 STORE!
+            </DialogTitle>
+            <DialogDescription className="text-cs-gray text-center">
+              Регайся и получи доступ к лучшим плагинам, моделям и сборкам для Counter-Strike 1.6!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label className="text-white">Gmail аккаунт</Label>
+              <Input
+                type="email"
+                placeholder="твой@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-cs-blue/20 border-cs-gray/30 text-white"
+              />
+            </div>
+            <div>
+              <Label className="text-white">Пароль</Label>
+              <Input
+                type="password"
+                placeholder="Придумай надёжный пароль"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-cs-blue/20 border-cs-gray/30 text-white"
+              />
+            </div>
+            <div className="space-y-3 pt-2">
+              <Button
+                onClick={handleAuth}
+                className="w-full bg-cs-orange hover:bg-cs-orange/90 text-white font-semibold"
+                size="lg"
+              >
+                <Icon name="UserPlus" className="mr-2" size={20} />
+                Зарегаться до пизды мира! 🚀
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAuthModal(false)}
+                className="w-full text-cs-gray hover:text-white hover:bg-cs-blue/20"
+              >
+                Может потом...
+              </Button>
+            </div>
+            <div className="text-center pt-2">
+              <p className="text-xs text-cs-gray">
+                Регистрируясь, ты получаешь доступ ко всем фишкам магазина и персональным скидкам!
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Header */}
       <header className="border-b border-cs-gray/20 bg-cs-navy/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
